@@ -12,12 +12,15 @@ cust_logger = CustomLogger(config.web_server.logger_name)
 
 class RegistrationForm(Form):
 	username = TextField('Username', [validators.Length(min=4, max=25)])
-	email = TextField('Email Address', [validators.Length(min=6, max=35)])
-	password = PasswordField('New Password', [
+	email = TextField('Email', [validators.Length(min=6, max=35)])
+	password = PasswordField('New password', [
 		validators.Required(),
 		validators.EqualTo('confirm', message='Passwords must match')
 	])
-	confirm = PasswordField('Repeat Password')
+	confirm = PasswordField('Confirm passeword')
+
+	def __init__(self, *args, **kwargs):
+		Form.__init__(self, *args, **kwargs)
 
 class LoginForm(Form):
 	username = TextField('Username', [validators.Required()])
@@ -40,12 +43,12 @@ class LoginForm(Form):
 		user = User.objects(username=self.username.data).first()
 		if user is None:
 			cust_logger.info("Invalid username entered")
-			self.username.errors.append('Unknown username')
+			self.password.errors.append('Unknown username or password')
 			return False
 
 		if not user.check_password(self.password.data):
 			cust_logger.info("Invalid password entered")
-			self.password.errors.append('Invalid password')
+			self.password.errors.append('Unknown username or password')
 			return False
 
 		self.user = user

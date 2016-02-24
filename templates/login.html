@@ -2,15 +2,15 @@
 Login
 
 {% block body %}
+{% from "_macroform.html" import render_field %}
+
   <h2>Login</h2>
-  <form action="" method="post">
-  <!-- Used to prevent csrf, generate hidden fields (flask wtf) -->
+<form method=post action="/login">
   {{ form.hidden_tag() }}
-    <dl>
-      <dt>User:
-      <dd><input type="text" name="username">
-      <dd><input type="password" name="password">
-      <dd><input type="submit" value="login">
-    </dl>
-  </form>
+  <dl>
+    {{ render_field(form.username) }}
+    {{ render_field(form.password) }}
+  </dl>
+  <p><input type=submit value=Login>
+</form>
 {% endblock %}
