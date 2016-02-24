@@ -8,6 +8,7 @@ import logging
 from os.path import expanduser
 home = expanduser("~")
 
+
 PATH_CONFIG_JSON = "./config.json"
 
 class GlobalConfig:
@@ -46,18 +47,21 @@ class GlobalConfig:
         def __init__(self):
             self.host = "0.0.0.0"
             self.port = 8080
+            self.logger_name = "webito"
 
         @classmethod
         def from_config(cls, dict_config):
             web_server = cls()
             web_server.host = dict_config['host']
             web_server.port = dict_config['port']
+            web_server.logger_name = dict_config['logger_name']
             return web_server
 
         def save_config(self):
             dict_config= {}
             dict_config['host'] = self.host 
             dict_config['port'] = self.port 
+            dict_config['logger_name'] = self.logger_name 
             return dict_config
 
     def __init__(self, path_config):
@@ -97,6 +101,6 @@ def init_config(config_file_path):
     config.from_config()
 
     globals()['CONFIG'] = config
-    
+
 if __name__ == '__main__':
     gc = GlobalConfig("./config.json").save_config()

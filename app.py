@@ -1,14 +1,18 @@
 import os
 import sys
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, flash
 from flask.ext.login import LoginManager, login_required
 
 import mongoengine
 
+from config import CONFIG
+config = CONFIG
+
+from logger import CustomLogger
+cust_logger = CustomLogger(config.web_server.logger_name)
+
 from models import User
 from loginForm import LoginForm
-
-
 
 app = Flask(__name__)
 
@@ -38,6 +42,7 @@ def login():
 		# user should be an instance of your `User` class
 		login_user(user)
 
+		cust_logger.info("Logged on user {} successfully".format(user.username))
 		flask.flash('Logged in successfully.')
 
 		next = flask.request.args.get('next')
@@ -47,6 +52,9 @@ def login():
 		#	return flask.abort(400)
 
 		return redirect(next or flask.url_for('index'))
+	flash(form.errors)
+	cust_logger.info("From failed to be validated")
+
 	return render_template('login.html', form=form)
 
 @app.route("/logout")
@@ -59,11 +67,6 @@ def logout():
 def index():
 	return 'Hello world'
 
-if __name__ == '__main__':
-	if len(sys.argv) > 1:
-		from config import init_config
-		init_config(sys.argv[1])
-		from config import CONFIG
-		config = CONFIG
-		db = mongoengine.connect(config.mongo_db.name)
-		app.run(debug=True, host='0.0.0.0', port=8080)
+def main():
+	db = mongoengine.connect(config.mongo_db.name)
+	app.run(debug=True, host='0.0.0.0', port=8080)
