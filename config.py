@@ -17,7 +17,7 @@ class GlobalConfig:
     """
     class MongoDB:
         def __init__(self):
-            self.name = "test_monitoring"
+            self.name = "webserver_db"
             self.host = "0.0.0.0"
             self.port = 27017
 
@@ -97,5 +97,6 @@ def init_config(config_file_path):
     config.from_config()
 
     globals()['CONFIG'] = config
+    
 if __name__ == '__main__':
     gc = GlobalConfig("./config.json").save_config()
