@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block style %}
+{% endblock %}
+
+{% block body %}
+
+Here is your admin view ! !
+<dl>
+<dt> Timestamp:
+{% for timestamp in list_ts %}
+<dd><p>{{ timestamp }}</p>
+{% endfor %}
+{% endblock body %}
+{% block javascript %}
+{% endblock %}

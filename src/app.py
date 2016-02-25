@@ -93,26 +93,26 @@ def register():
 
 	form = RegistrationForm()
 	#Validation of the form only in case of a submit (would not validate if not POST)
-	if form.validate_on_submit():
-		new_user = User(username = form.username.data, email=form.email.data)
-		cust_logger.info("Creating new user {}".format(new_user))
-		#set the hash of the password
-		try:
+	try:
+		if form.validate_on_submit():
+			new_user = User(username = form.username.data, email=form.email.data)
+			cust_logger.info("Creating new user {}".format(new_user))
+			#set the hash of the password
 			new_user.create_hash_password(form.password.data)
 			#save user in database
 			new_user.save()
-		except Exception as e:
-			cust_logger.exception(e)
-			cust_logger.warning("Couldn't save user, redirection to registration page")
-			flash('The server is experiencing troubles and failed to register you. Please retry '\
-							'or contact our customer service if the problem persists')
-			return render_template('register.html', form=form)
 
-		flash('Thanks for registering')
-		#redirect to login after registration
-		return redirect(url_for('login'))
+			flash('Thanks for registering')
+			#redirect to login after registration
+			return redirect(url_for('login'))
+	except Exception as e:
+		cust_logger.exception(e)
+		cust_logger.warning("Couldn't save user, redirection to registration page")
+		flash('The server is experiencing troubles and failed to register you. Please retry '\
+						'or contact our customer service if the problem persists')
+		return render_template('register.html', form=form)
 	cust_logger.info(str(form.errors))
-	flash(form.errors)
+	#flash(form.errors)
 	#by default return the page (in case of a get for instance)
 	return render_template('register.html', form=form)
 
@@ -127,10 +127,10 @@ def login():
 		return redirect(url_for('index'))
 
 	form = LoginForm()
-	if form.validate_on_submit():
-		user_to_log = User.objects(username=form.username.data).first()
-		login_user(user_to_log)
-		try:
+	try:
+		if form.validate_on_submit():
+			user_to_log = User.objects(username=form.username.data).first()
+			login_user(user_to_log)
 			user_to_log.handler_logging_successful()
 			cust_logger.info("Logged on user {} successfully".format(user_to_log.username))
 			flash('Logged in successfully.')
@@ -138,14 +138,14 @@ def login():
 			#change the identity for permissions, raising the identity changed event :
 			identity_changed.send(current_app._get_current_object(), 
 													identity=Identity(current_user.get_id()))
-		except Exception as e:
-			cust_logger.exception(e)
-			cust_logger.warning("Couldn't log on user, redirection to login page")
-			flash('The server is experiencing troubles and failed to register you. Please retry '\
-							'or contact our customer service if the problem persists')
-			return render_template('login.html', form=form)
-		return redirect(url_for('index'))
-	flash(form.errors)
+			return redirect(url_for('index'))
+	except Exception as e:
+		cust_logger.exception(e)
+		cust_logger.warning("Couldn't log on user, redirection to login page")
+		flash('The server is experiencing troubles and failed to register you. Please retry '\
+						'or contact our customer service if the problem persists')
+		return render_template('login.html', form=form)
+	#flash(form.errors)
 	cust_logger.info("From failed to be validated")
 
 	return render_template('login.html', form=form)
@@ -158,7 +158,8 @@ def list_ts():
 	"""
 	#display all the users list if admin
 	if admin_permission.can():
-		return render_template("list_users_admin.html")
+		list_ts = [str(ts) for ts in current_user.get_timestamps()]
+		return render_template("list_users_admin.html", list_ts=list_ts)
 	#display its own list if entitleted to do so
 	elif ts_entitled_permission.can():
 		list_ts = [str(ts) for ts in current_user.get_timestamps()]

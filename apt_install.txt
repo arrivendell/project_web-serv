@@ -1,10 +1,1 @@
-sudo apt-get update; sudo apt-get install python-dev -y
-sudo apt-get install libffi-dev
-
-
-> check timeout session ( check every time you move page ?)
-> add exceptions
-> check this is_logged stuff for login and logout
-> add tests
-> save mongodb if fail reconnect
-> role not efficient before logout
+sudo apt-get update; sudo apt-get install python-dev -y libffi-dev mongodb
