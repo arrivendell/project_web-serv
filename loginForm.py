@@ -21,6 +21,30 @@ class RegistrationForm(Form):
 
 	def __init__(self, *args, **kwargs):
 		Form.__init__(self, *args, **kwargs)
+	
+	def validate(self):
+		"""
+		Validaion of the form, checking if user does not already exist
+		"""
+		cust_logger.info("Trying to register new user {}".format(self.username))
+
+		rv = Form.validate(self)
+		if not rv:
+			return False
+
+		user = User.objects(username=self.username.data).first()
+		if user is not None:
+			cust_logger.info("Username already used")
+			self.username.errors.append('Username already used')
+			return False
+
+		user = User.objects(email=self.email.data).first()
+		if user is not None:
+			cust_logger.info("Email already used")
+			self.email.errors.append('Email already used')
+			return False
+		return True
+
 
 class LoginForm(Form):
 	username = TextField('Username', [validators.Required()])

@@ -1,7 +1,7 @@
 import os
 import sys
 from flask import Flask, render_template, redirect, flash, url_for, request
-from flask.ext.login import LoginManager, login_required, login_user
+from flask.ext.login import LoginManager, login_required, login_user, logout_user
 
 import mongoengine
 
@@ -80,7 +80,8 @@ def logout():
 
 @app.route('/')
 def index():
-	return 'Hello world'
+	return render_template('index.html')
+
 
 def main():
 	db = mongoengine.connect(config.mongo_db.name)
