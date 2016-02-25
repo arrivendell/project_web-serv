@@ -12,6 +12,10 @@ cust_logger = CustomLogger(config.web_server.logger_name)
 
 
 class RegistrationForm(Form):
+	"""
+	Class for a form used to register a user. Fields can be with non uniform case, methods must deal
+	with lowering the fields if needed
+	"""
 	username = TextField('Username', [validators.Length(min=4, max=25)])
 	email = TextField('Email', [validators.Length(min=6, max=35)])
 	password = PasswordField('New password', [
@@ -22,10 +26,12 @@ class RegistrationForm(Form):
 
 	def __init__(self, *args, **kwargs):
 		Form.__init__(self, *args, **kwargs)
+
 	
 	def validate(self):
 		"""
-		Validaion of the form, checking if user does not already exist
+		Validaion of the form, checking if user with the same email or username does not already 
+		exist
 		"""
 		cust_logger.info("Trying to register new user {}".format(self.username.data))
 
@@ -33,13 +39,13 @@ class RegistrationForm(Form):
 		if not rv:
 			return False
 
-		user = User.objects(username=self.username.data).first()
+		user = User.objects(username=self.username.data.lower()).first()
 		if user is not None:
 			cust_logger.info("Username already used")
 			self.username.errors.append('Username already used')
 			return False
 
-		user = User.objects(email=self.email.data).first()
+		user = User.objects(email=self.email.data.lower()).first()
 		if user is not None:
 			cust_logger.info("Email already used")
 			self.email.errors.append('Email already used')
@@ -65,7 +71,7 @@ class LoginForm(Form):
 		if not rv:
 			return False
 
-		user = User.objects(username=self.username.data).first()
+		user = User.objects(username=self.username.data.lower()).first()
 		if user is None:
 			cust_logger.info("Invalid username entered")
 			self.password.errors.append('Unknown username or password')

@@ -9,8 +9,6 @@ from flask.ext.principal import Principal, Permission, UserNeed, RoleNeed, ident
 
 import mongoengine
 
-from OpenSSL import SSL
-
 
 from config import CONFIG
 config = CONFIG
@@ -23,7 +21,7 @@ from loginForm import LoginForm, RegistrationForm
 
 app = Flask(__name__)
 
-# set the secret key.  keep this really secret:
+#Secret key of the app, could be from file
 app.secret_key = os.urandom(24)
 
 # load extension permissions
@@ -51,6 +49,9 @@ def load_user(user_id):
 #add roles to the identity insatance
 @identity_loaded.connect_via(app)
 def on_identity_loaded(sender, identity):
+	"""
+	Called whenever a new identity is loaded in the app
+	"""
 	identity.user = current_user
 
 	if hasattr(current_user, 'id'):
@@ -63,36 +64,50 @@ def on_identity_loaded(sender, identity):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+	"""
+	Handle registration of a new user
+	"""
+	#In case the user is already logged in, we redirect to index
 	if current_user.is_authenticated:
 		return redirect(url_for('index'))
+
 	form = RegistrationForm()
+	#Validation of the form only in case of a submit (would not validate if not POST)
 	if form.validate_on_submit():
 		new_user = User(username = form.username.data, email=form.email.data)
 		cust_logger.info("Creating new user {}".format(new_user))
+		#set the hash of the password
 		new_user.create_hash_password(form.password.data)
+		#save user in database
 		new_user.save()
+
 		flash('Thanks for registering')
+		#redirect to login after registration
 		return redirect(url_for('login'))
 	cust_logger.info(str(form.errors))
 	flash(form.errors)
+	#by default return the page (in case of a get for instance)
 	return render_template('register.html', form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+	"""
+	Handle the login try of a user
+	"""
+	#In case the user is already logged in, we redirect to index
 	if current_user.is_authenticated:
 		return redirect(url_for('index'))
+
 	form = LoginForm()
 	if form.validate_on_submit():
-		# Login and validate the user.
-		# user should be an instance of your `User` class
 		user_to_log = User.objects(username=form.username.data).first()
 		login_user(user_to_log)
 		user_to_log.handler_logging_successful()
 		cust_logger.info("Logged on user {} successfully".format(user_to_log.username))
 		flash('Logged in successfully.')
 
-		#change the identity for permissions :
+		#change the identity for permissions, raising the identity changed event :
 		identity_changed.send(current_app._get_current_object(), 
 													identity=Identity(current_user.get_id()))
 
@@ -110,9 +125,14 @@ def login():
 
 @app.route('/list_ts', methods=['GET'])
 def list_ts():
+	"""
+	Handle the display of the list of the last successful connection timestamps of a user, rendering
+	a view corresponding to his role
+	"""
 	#display all the users list if admin
 	if admin_permission.can():
 		return render_template("list_users_admin.html")
+	#display its own list if entitleted to do so
 	elif ts_entitled_permission.can():
 		list_ts = [str(ts) for ts in current_user.get_timestamps()]
 		return render_template("list_ts_user.html", list_ts=list_ts)
@@ -145,7 +165,6 @@ def main():
 		admin = User(username="admin", email="admin@webito.com", roles=[Roles.ADMIN])
 		admin.create_hash_password("admin")
 		admin.save()
-	context = ('cert.crt', 'key.key')
-	context.use_certificate_file(config.web_server.path_cert_server)
+	context = (config.web_server.path_cert_server, config.web_server.path_key_server)
 
-	app.run(debug=True, host='0.0.0.0', port=8080, ssl_context=context)
+	app.run(debug=True, host='127.0.0.1', port=8080)#, ssl_context=context)
