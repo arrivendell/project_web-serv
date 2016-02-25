@@ -7,6 +7,10 @@
   		 <input type="submit" value="Logout">
 	</form>
   Hi {{ current_user.username }}!
+   	 <form action="/list_ts">
+  		 <input type="submit" value="Last Successful logins">
+	</form>
+
 {% else %}
  	<form action="/login">
   		 <input type="submit" value="Login">

@@ -21,8 +21,9 @@ from loginForm import LoginForm, RegistrationForm
 
 app = Flask(__name__)
 
-#Secret key of the app, could be from file
+#Secret key of the app, must be from file to prevent invalidating existing ses sions on restart
 app.secret_key = os.urandom(24)
+app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 # load extension permissions
 principals = Principal(app)
@@ -157,14 +158,39 @@ def logout():
 def index():
 	return render_template('index.html')
 
+def create_admin():
+	"""
+	Create and persist an admin user if not already existing
+	"""
+	try:
+		admin = User.objects(username="admin").first()
+		if admin is None:
+			admin = User(username="admin", email="admin@webito.com", roles=[Roles.ADMIN])
+			admin.create_hash_password("admin")
+			admin.save()
+	except Exception as e:
+		cust_logger.exception(e)
+		cust_logger.error("admin user creation impossible")
+
+
 
 def main():
-	db = mongoengine.connect(config.mongo_db.name)
-	admin = User.objects(username="admin").first()
-	if admin is None:
-		admin = User(username="admin", email="admin@webito.com", roles=[Roles.ADMIN])
-		admin.create_hash_password("admin")
-		admin.save()
-	context = (config.web_server.path_cert_server, config.web_server.path_key_server)
-
-	app.run(debug=True, host='127.0.0.1', port=8080)#, ssl_context=context)
+	try:
+		db = mongoengine.connect(config.mongo_db.name)
+	except mongoengine.ConnectionError as ce:
+		cust_logger.exception(ce)
+		cust_logger.error("connexion to database impossible, run aborted")
+		return
+	except Exception as e:	
+		cust_logger.exception(ce)
+		cust_logger.error("unexpected error while trying to connect to database, run aborted")
+		return
+	create_admin()
+	
+	if config.web_server.is_https :
+		#set secure context for https connexion
+		app.config['SESSION_COOKIE_SECURE'] = True
+		context = (config.web_server.path_cert_server, config.web_server.path_key_server)
+		app.run(debug=True, host='127.0.0.1', port=8080, ssl_context=context)
+	else:
+		app.run(debug=True, host='127.0.0.1', port=8080)#, ssl_context=context)

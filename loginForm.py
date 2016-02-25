@@ -30,8 +30,9 @@ class RegistrationForm(Form):
 	
 	def validate(self):
 		"""
-		Validaion of the form, checking if user with the same email or username does not already 
-		exist
+		Validaion of the form, checking user unicity
+		:return: True if form is correct and if a user with the same email or username does not 
+		already exist, False otherwise
 		"""
 		cust_logger.info("Trying to register new user {}".format(self.username.data))
 
@@ -47,13 +48,16 @@ class RegistrationForm(Form):
 
 		user = User.objects(email=self.email.data.lower()).first()
 		if user is not None:
-			cust_logger.info("Email already used")
+			cust_logger.info("Email already used".format())
 			self.email.errors.append('Email already used')
 			return False
 		return True
 
 
 class LoginForm(Form):
+	"""
+	Class for a form to log a user. Fields can be with non-uniform case. Handle password validation
+	"""
 	username = TextField('Username', [validators.Required()])
 	password = PasswordField('Password', [validators.Required()])
 
@@ -63,7 +67,9 @@ class LoginForm(Form):
 
 	def validate(self):
 		"""
-		Validaion of the form, checking user password
+		Validaion of the form, checking user password hash with stored one.
+		:return: True if the form is correct and the user as given correct credentials, 
+		False otherwise
 		"""
 		cust_logger.info("Trying to validate form")
 

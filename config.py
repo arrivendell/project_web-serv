@@ -52,6 +52,7 @@ class GlobalConfig:
             self.max_size_list_ts = 6
             self.path_key_server = "tls/serverkey.key"
             self.path_cert_server = "tls/servercert.cert"
+            self.is_https = False
 
         @classmethod
         def from_config(cls, dict_config):
@@ -63,6 +64,7 @@ class GlobalConfig:
             web_server.max_size_list_ts = dict_config['max_size_list_ts']
             web_server.path_key_server = dict_config['path_key_server']
             web_server.path_cert_server = dict_config['path_cert_server']
+            web_server.is_https = dict_config['is_https']
             return web_server
 
         def save_config(self):
@@ -74,6 +76,7 @@ class GlobalConfig:
             dict_config['max_size_list_ts'] = self.max_size_list_ts 
             dict_config['path_key_server'] = self.path_key_server 
             dict_config['path_cert_server'] = self.path_cert_server 
+            dict_config['is_https'] = self.is_https 
             return dict_config
 
     def __init__(self, path_config):

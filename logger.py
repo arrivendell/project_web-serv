@@ -46,12 +46,6 @@ class CustomLogger:
         hdlr.setLevel(config.logger_level)
         self.logger.addHandler(hdlr)
 
-        #bind to output
-
-        #hdlrOut = logging.StreamHandler(sys.stdout)
-        #hdlr.setFormatter(self.formatter_out)
-        #hdlr.setLevel(config.logger_level)
-        #self.logger.addHandler(hdlrOut)
         return dest_log
 
     def debug(self, message):

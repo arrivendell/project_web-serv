@@ -14,6 +14,9 @@ class Roles:
 	TS_ENTITLED = "ts_entitled"
 
 class User(mongoengine.Document, UserMixin):
+	"""
+	Represent a user, identifyied by a unique username. 
+	"""
 
 	#user_id = mongoengine.StringField(required=True)
 	username = mongoengine.StringField(required=True, primary_key=True)
@@ -24,7 +27,6 @@ class User(mongoengine.Document, UserMixin):
 	_is_authenticated = mongoengine.BooleanField(default=False)
 	_is_active = mongoengine.BooleanField(default=True)
 	roles = mongoengine.ListField(default=[Roles.TS_ENTITLED])
-
 
 	def is_authenticated(self):
 		return self._is_authenticated
@@ -72,13 +74,28 @@ class User(mongoengine.Document, UserMixin):
 		self.save()
 
 	def add_role(self, role):
+		"""
+		Add a role to the user if the role does not already exists.
+		:role: role to add, ´´Roles´´
+		"""
 		if role not in self.roles:
 			self.roles.append(role)
+		self.save()
+
 
 	def remove_role(self, role_to_delete):
+		"""
+		Remove a role from the user
+		:param role_to_delete: role that must be removed, ´´Roles´´
+		"""
 		self.roles = [role for role in self.roles if role != role_to_delete]
+		self.save()
+
 
 	def handler_logout(self):
+		"""
+		Proceed to structure changes to logout the user.
+		"""
 		self._is_authenticated = False
 		self.save()
 
