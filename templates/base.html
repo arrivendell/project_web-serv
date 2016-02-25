@@ -6,12 +6,10 @@
 <!-- Custom styles for this template -->
 {% block style %}
 {% endblock %}
-{% if current_user.is_authenticated %}
-  Hi {{ current_user.username }}!
- 	 <form action="/logout">
-  		 <input type="submit" value="Logout">
-	</form>
-{% endif %}
+{% for message in get_flashed_messages() %}
+<div class=flash>{{ message }}</div>
+{% endfor %}
+
 </head>
 <body>
 {% block body %}

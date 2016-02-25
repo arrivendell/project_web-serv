@@ -48,6 +48,8 @@ class GlobalConfig:
             self.host = "0.0.0.0"
             self.port = 8080
             self.logger_name = "webito"
+            self.nbr_ts_returned = 5
+            self.max_size_list_ts = 6
 
         @classmethod
         def from_config(cls, dict_config):
@@ -55,6 +57,8 @@ class GlobalConfig:
             web_server.host = dict_config['host']
             web_server.port = dict_config['port']
             web_server.logger_name = dict_config['logger_name']
+            web_server.nbr_ts_returned = dict_config['nbr_ts_returned']
+            web_server.max_size_list_ts = dict_config['max_size_list_ts']
             return web_server
 
         def save_config(self):
@@ -62,6 +66,8 @@ class GlobalConfig:
             dict_config['host'] = self.host 
             dict_config['port'] = self.port 
             dict_config['logger_name'] = self.logger_name 
+            dict_config['nbr_ts_returned'] = self.nbr_ts_returned 
+            dict_config['max_size_list_ts'] = self.max_size_list_ts 
             return dict_config
 
     def __init__(self, path_config):

@@ -2,6 +2,16 @@
 {% block style %}
 {% endblock %}
 {% block body %}
+{% if current_user.is_authenticated %}
+ 	 <form action="/logout">
+  		 <input type="submit" value="Logout">
+	</form>
+  Hi {{ current_user.username }}!
+{% else %}
+ 	 <form action="/login">
+  		 <input type="submit" value="Login">
+	</form>
+{% endif %}
 Welcome to the index of webito !
 {% endblock body %}
 {% block javascript %}

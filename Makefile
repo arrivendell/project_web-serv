@@ -5,7 +5,7 @@ virtualenv:
 	@-rm -rf ./build
 	@virtualenv ./build/venv/ --no-site-packages
 	@echo "--->  Installing dependencies in Virtual env"
-	@./build/venv/bin/pip install --upgrade wheel pex setuptools flask bcrypt flask-login flask-wtf
+	@./build/venv/bin/pip install --upgrade wheel pex setuptools flask bcrypt flask-login flask-wtf flask-principal
 
 #pex_packaging:
 #	@echo "---> Installing local modules"

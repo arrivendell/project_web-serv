@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from flask.ext.wtf import Form
 from wtforms.fields import TextField, PasswordField
 from wtforms import validators
@@ -26,7 +27,7 @@ class RegistrationForm(Form):
 		"""
 		Validaion of the form, checking if user does not already exist
 		"""
-		cust_logger.info("Trying to register new user {}".format(self.username))
+		cust_logger.info("Trying to register new user {}".format(self.username.data))
 
 		rv = Form.validate(self)
 		if not rv:
