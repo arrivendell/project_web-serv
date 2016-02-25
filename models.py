@@ -44,6 +44,11 @@ class User(mongoengine.Document, UserMixin):
 		return self.email
 
 	def get_timestamps(self, nbr_timestamp=config.web_server.nbr_ts_returned):
+		"""
+		Get the list of last timestamps of successful connection
+		:param nbr_timestamp: nbre of timestamps returned (default value in config file),´´int´´
+		:return: subcopy of the list
+		"""
 		return self._list_timestamps[-nbr_timestamp:]
 
 	def check_password(self, password):
@@ -71,32 +76,45 @@ class User(mongoengine.Document, UserMixin):
 		"""
 		self._list_timestamps.append(datetime.datetime.now())
 		#we keep the list with the same size removing the first (and oldest) entry
+		old_pop = None
 		if len(self._list_timestamps) > config.web_server.max_size_list_ts:
-			self._list_timestamps.pop(0)
+			old_pop = self._list_timestamps.pop(0)
 		self._is_authenticated = True
 		try:
 			self.save()
 		except Exception as e:
+			self._is_authenticated = False
+			self._list_timestamps.pop()
+			if old_pop is not None:
+				self._list_timestamps.insert(0,old_pop)
 			raise LoggingHandlingException
 
 	def add_role(self, role):
 		"""
-		Add a role to the user if the role does not already exists.
+		Add a role to the user if the role does not already exists. If cannot save to database, 
+		restore previous state
 		:role: role to add, ´´Roles´´
 		"""
 		if role not in self.roles:
 			self.roles.append(role)
-		self.save()
-
+		try:
+			self.save()
+		except Exception as e:
+			#we put back the old list
+			self.roles = [r for r in self.roles if r != role]
+			raise e
 
 	def remove_role(self, role_to_delete):
 		"""
-		Remove a role from the user
+		Remove a role from the user. If cannot save to database, restore previous state
 		:param role_to_delete: role that must be removed, ´´Roles´´
 		"""
 		self.roles = [role for role in self.roles if role != role_to_delete]
-		self.save()
-
+		try:
+			self.save()
+		except Exception as e:
+			self.roles.append(role_to_delete)
+			raise e
 
 	def handler_logout(self):
 		"""

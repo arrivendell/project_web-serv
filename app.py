@@ -54,15 +54,15 @@ def request_logging():
 	"""
 	Simple log of reques context before each request is processed
 	"""
-    if 'text/html' in request.headers['Accept']:
-        cust_logger.debug(', '.join([
-            datetime.datetime.today().ctime(),
-            request.remote_addr,
-            request.method,
-            request.url,
-            request.data,
-            ', '.join([': '.join(x) for x in request.headers if x[0]=="User-Agent" ])])
-        )
+	if 'text/html' in request.headers['Accept']:
+		cust_logger.debug(', '.join([
+			datetime.datetime.today().ctime(),
+			request.remote_addr,
+			request.method,
+			request.url,
+			request.data,
+			', '.join([': '.join(x) for x in request.headers if x[0]=="User-Agent" ])])
+		)
 
 
 #add roles to the identity insatance
@@ -175,8 +175,12 @@ def logout():
 	#clean permissions related keys
 	for key in ('identity.name', 'identity.auth_type'):
 		session.pop(key, None)
-
-	logout_user()
+	try:	
+		logout_user()
+	except Exception as e:
+		cust_logger.exception(e)
+		cust_logger.warning("Impossible to logout user")
+		flash("An error has occured, try to logout again")
 	return redirect(url_for("index"))
 
 @app.route('/')
