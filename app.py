@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import datetime 
 from flask import Flask, render_template, redirect, flash, url_for, request, abort, session
 from flask.ext.login import LoginManager, login_required, login_user, logout_user, current_user, \
 											current_app
@@ -16,7 +17,7 @@ config = CONFIG
 from logger import CustomLogger
 cust_logger = CustomLogger(config.web_server.logger_name)
 
-from models import User, Roles
+from models import User, Roles, LoggingHandlingException
 from loginForm import LoginForm, RegistrationForm
 
 app = Flask(__name__)
@@ -46,6 +47,23 @@ def load_user(user_id):
 	:return: None if no user exists with this user_id, or the user. 
 	"""
 	return User.objects(email=user_id).first()
+
+
+@app.before_request
+def request_logging():
+	"""
+	Simple log of reques context before each request is processed
+	"""
+    if 'text/html' in request.headers['Accept']:
+        cust_logger.debug(', '.join([
+            datetime.datetime.today().ctime(),
+            request.remote_addr,
+            request.method,
+            request.url,
+            request.data,
+            ', '.join([': '.join(x) for x in request.headers if x[0]=="User-Agent" ])])
+        )
+
 
 #add roles to the identity insatance
 @identity_loaded.connect_via(app)
@@ -78,9 +96,16 @@ def register():
 		new_user = User(username = form.username.data, email=form.email.data)
 		cust_logger.info("Creating new user {}".format(new_user))
 		#set the hash of the password
-		new_user.create_hash_password(form.password.data)
-		#save user in database
-		new_user.save()
+		try:
+			new_user.create_hash_password(form.password.data)
+			#save user in database
+			new_user.save()
+		except Exception as e:
+			cust_logger.exception(e)
+			cust_logger.warning("Couldn't save user, redirection to registration page")
+			flash('The server is experiencing troubles and failed to register you. Please retry '\
+							'or contact our customer service if the problem persists')
+			return render_template('register.html', form=form)
 
 		flash('Thanks for registering')
 		#redirect to login after registration
@@ -104,21 +129,21 @@ def login():
 	if form.validate_on_submit():
 		user_to_log = User.objects(username=form.username.data).first()
 		login_user(user_to_log)
-		user_to_log.handler_logging_successful()
-		cust_logger.info("Logged on user {} successfully".format(user_to_log.username))
-		flash('Logged in successfully.')
+		try:
+			user_to_log.handler_logging_successful()
+			cust_logger.info("Logged on user {} successfully".format(user_to_log.username))
+			flash('Logged in successfully.')
 
-		#change the identity for permissions, raising the identity changed event :
-		identity_changed.send(current_app._get_current_object(), 
+			#change the identity for permissions, raising the identity changed event :
+			identity_changed.send(current_app._get_current_object(), 
 													identity=Identity(current_user.get_id()))
-
-		next = request.args.get('next')
-		# next_is_valid should check if the user has valid
-		# permission to access the `next` url
-		#if not next_is_valid(next):
-		#	return flask.abort(400)
-
-		return redirect(next or url_for('index'))
+		except Exception as e:
+			cust_logger.exception(e)
+			cust_logger.warning("Couldn't log on user, redirection to login page")
+			flash('The server is experiencing troubles and failed to register you. Please retry '\
+							'or contact our customer service if the problem persists')
+			return render_template('login.html', form=form)
+		return redirect(url_for('index'))
 	flash(form.errors)
 	cust_logger.info("From failed to be validated")
 

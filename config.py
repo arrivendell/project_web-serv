@@ -85,7 +85,7 @@ class GlobalConfig:
         self.mongo_db = GlobalConfig.MongoDB()
         self.web_server = GlobalConfig.WebServer()
         self.path_log = "./log/"
-        self.logger_level = logging.DEBUG
+        self.logger_level = logging.INFO
         self.path_config = path_config
 
     def from_config(self):

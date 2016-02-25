@@ -8,6 +8,9 @@ from collections import deque
 from config import CONFIG
 config = CONFIG
 
+#separate file for exceptions in a bigger app
+class LoggingHandlingException(Exception):
+	pass
 
 class Roles:
 	ADMIN = "admin"
@@ -71,7 +74,10 @@ class User(mongoengine.Document, UserMixin):
 		if len(self._list_timestamps) > config.web_server.max_size_list_ts:
 			self._list_timestamps.pop(0)
 		self._is_authenticated = True
-		self.save()
+		try:
+			self.save()
+		except Exception as e:
+			raise LoggingHandlingException
 
 	def add_role(self, role):
 		"""
