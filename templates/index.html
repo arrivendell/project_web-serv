@@ -8,8 +8,11 @@
 	</form>
   Hi {{ current_user.username }}!
 {% else %}
- 	 <form action="/login">
+ 	<form action="/login">
   		 <input type="submit" value="Login">
+	</form>
+ 	 <form action="/register">
+  		 <input type="submit" value="Register">
 	</form>
 {% endif %}
 Welcome to the index of webito !

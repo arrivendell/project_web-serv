@@ -2,7 +2,14 @@
 Login
 
 {% block body %}
-  <h2>Login</h2>
+  <h2>Registration</h2>
+  
+{% if current_user.is_authenticated %}
+ 	 You are already logged in !
+  	 <form action="/logout">
+  		 <input type="submit" value="Logout">
+	</form>
+{% else %}
 {% from "_macroform.html" import render_field %}
 <form method=post action="/register">
   {{ form.hidden_tag() }}
@@ -14,5 +21,6 @@ Login
   </dl>
   <p><input type=submit value=Register>
 </form>
+{% endif %}
 
 {% endblock %}

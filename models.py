@@ -8,6 +8,11 @@ from collections import deque
 from config import CONFIG
 config = CONFIG
 
+
+class Roles:
+	ADMIN = "admin"
+	TS_ENTITLED = "ts_entitled"
+
 class User(mongoengine.Document, UserMixin):
 
 	#user_id = mongoengine.StringField(required=True)
@@ -18,7 +23,7 @@ class User(mongoengine.Document, UserMixin):
 	_list_timestamps = mongoengine.ListField(default=[])
 	_is_authenticated = mongoengine.BooleanField(default=False)
 	_is_active = mongoengine.BooleanField(default=True)
-	roles = mongoengine.ListField(default=[])
+	roles = mongoengine.ListField(default=[Roles.TS_ENTITLED])
 
 
 	def is_authenticated(self):
@@ -88,8 +93,3 @@ class User(mongoengine.Document, UserMixin):
 
 	def __str__(self):
 		return " username : <{}>, email: <{}>".format(self.username, self.email)
-
-
-class Roles:
-	ADMIN = "admin"
-	TS_ENTITLED = "ts_entitled"
