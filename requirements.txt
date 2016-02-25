@@ -1,5 +1,6 @@
 setuptools>=17.1
 mock
+mongoengine
 flask
 bcrypt
 flask-login
