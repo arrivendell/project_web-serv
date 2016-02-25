@@ -1,12 +1,14 @@
 import unittest
-from mock import MagicMock
+from mock import MagicMock, Mock
 import datetime 
 
 from config import init_config
 init_config("config.json")
 from config import CONFIG
 config = CONFIG
+from app import *
 from models import User, Roles, LoggingHandlingException
+from loginForm import RegistrationForm, LoginForm
 
 class TestModelUser(unittest.TestCase):
 
@@ -71,6 +73,35 @@ class TestModelUser(unittest.TestCase):
 		self.assertTrue(user.check_password(password))
 		self.assertFalse(user.check_password(password+" "))
 
+
+class TestLoginForms(unittest.TestCase):
+	def setUp(self):
+		app.app_context()
+		self.app = app.test_client()
+#
+#
+#	def login(self, username, password):
+#		return self.app.post('/login', data=dict(username=username, 
+#												password=password))
+#
+#	def logout(self):
+#		return self.app.get('/logout', follow_redirects=True)
+#
+	def create_user(self, username="test_username", user_email = "test@email.fr"):
+		user = User(username=username, email=user_email)
+		return user
+
+#	def test_registration_form(self):
+#		rv = self.login('admin', 'default')
+
+#	def test_registration_form(self):
+#		user = self.create_user()
+#		ctx = app.app_context()
+#		ctx.push()
+#
+#		with ctx:
+#			reg_form = RegistrationForm(data={'username': user.username})
+#
 
 if __name__ == '__main__':
 	unittest.main()

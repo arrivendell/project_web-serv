@@ -21,6 +21,7 @@ from models import User, Roles, LoggingHandlingException
 from loginForm import LoginForm, RegistrationForm
 
 app = Flask(__name__)
+app.config['TESTING'] = True
 
 #Secret key of the app, must be from file to prevent invalidating existing ses sions on restart
 app.secret_key = os.urandom(24)

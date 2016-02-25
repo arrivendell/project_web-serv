@@ -5,14 +5,13 @@ virtualenv:
 	@-rm -rf ./build
 	@virtualenv ./build/venv/ --no-site-packages
 	@echo "--->  Installing dependencies in Virtual env"
-	@./build/venv/bin/pip install --upgrade wheel pex setuptools mock flask bcrypt flask-login flask-wtf flask-principal
+	@./build/venv/bin/pip install --upgrade wheel pex setuptools flask bcrypt flask-login flask-wtf flask-principal
 
-#pex_packaging:
-#	@echo "---> Installing local modules"
-#	@-rm -rf ~/.pex/install/webito*
-#	@-rm -rf ~/.pex/build/webito* 
-#	@-rm -rf dist/
-#	@-rm -rf build/venv_pex
-#	@./build/venv/bin/python setup.py bdist_wheel
-#	@echo "--> Building pex package"
-#	@./build/venv/bin/pex --repo dist/ --repo ../dist/ cdn_monito --cache-dir ../../build/pex-cache -r ../main_server/requirements_main_server.txt -m src.run:main --python=../../build/venv/bin/python2.7 -o ../ansible/roles/cdn/files/cdn_build.pex  
+pex_packaging:
+	@echo "---> Installing local modules"
+	@-rm -rf ~/.pex/install/webito*
+	@-rm -rf ~/.pex/build/webito* 
+	@-rm -rf dist/
+	@./build/venv/bin/python setup.py bdist_wheel
+	@echo "--> Building pex package"
+	@./build/venv/bin/pex --repo dist/ --repo ../dist/ webito --cache-dir ../../build/pex-cache -r ./requirements.txt -m run.main --python=../../build/venv/bin/python2.7 -o ./build/webito.pex  

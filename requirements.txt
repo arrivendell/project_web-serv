@@ -1,0 +1,6 @@
+mock
+flask
+bcrypt
+flask-login
+flask-wtf
+flask-principal
